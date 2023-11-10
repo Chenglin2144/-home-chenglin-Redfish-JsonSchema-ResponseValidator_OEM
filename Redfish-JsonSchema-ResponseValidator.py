@@ -75,21 +75,7 @@ def usage():
     print ('\n')
     sys.exit()
 
-def download_webpage(url):
-    try:
-        parsed_url = urlparse(url)
-        webpage_name = parsed_url.path.split("/")[-1] or "index.html"
 
-        response = requests.get(url)
-
-        if response.status_code == 200:
-            with open(webpage_name, "w", encoding="utf-8") as file:
-                file.write(response.text)
-            print(f"網頁下載成功！已儲存為 {webpage_name}")
-        else:
-            print(f"錯誤：無法下載網頁。狀態碼：{response.status_code}")
-    except Exception as e:
-        print(f"錯誤：{str(e)}")
 
 def parseArgs(rv,argv):
     # parse args
@@ -329,6 +315,28 @@ class ResourceValidate(object):
               self.rescount += 1
               self.validate(data,schname,fname)
 
+    def download_webpage(self,uri_name,target_folder):
+        try:
+            # 發送 GET 請求
+            response = requests.get(uri_name)
+
+            # 檢查請求是否成功
+            if response.status_code == 200:
+                # 獲取 URL 中的最後一部分作為檔案名稱
+                filename = os.path.basename(uri_name)
+
+                # 組合目標檔案的完整路徑
+                target_path = os.path.join(target_folder, filename)
+
+                # 將內容保存到指定檔案
+                with open(target_path, "wb") as file:
+                    file.write(response.content)
+                print(f"下載成功！檔案已保存為 {target_path}")
+            else:
+                print(f"錯誤：無法下載資源。狀態碼：{response.status_code}")
+        except Exception as e:
+            print(f"錯誤：{str(e)}")
+
     def getFromOrg(self,schname):
         ''' Fetch the schema from the redfish organization
         '''
@@ -343,7 +351,9 @@ class ResourceValidate(object):
                 r.status_code,schname)
                 uri = self.orgurl1 + schname
                 return -1
-        download_webpage(uri)
+        # print("uri is ",uri)
+        target_folder = "/home/chenglin/DMTFSchemas"
+        self.download_webpage(uri,target_folder)
         return r.text
 
     def getFromLocal(self,schname):
