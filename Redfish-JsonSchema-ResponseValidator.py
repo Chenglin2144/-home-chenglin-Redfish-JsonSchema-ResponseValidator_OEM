@@ -340,10 +340,10 @@ class ResourceValidate(object):
             self.errHandle('ERROR GET ERROR: schema not found',
                             r.status_code,schname)
             r = requests.get(self.orgurl1 + schname)
-            if r.status_code != 200:
-                self.errHandle('ERROR GET ERROR: schema not found',
-                r.status_code,schname)
-                return -1
+            # if r.status_code != 200:
+            #     self.errHandle('ERROR GET ERROR: schema not found',
+            #     r.status_code,schname)
+            #     return -1
         download_webpage(r.uri)
             # return -1
         return r.text
