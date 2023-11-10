@@ -75,6 +75,22 @@ def usage():
     print ('\n')
     sys.exit()
 
+def download_webpage(url):
+    try:
+        parsed_url = urlparse(url)
+        webpage_name = parsed_url.path.split("/")[-1] or "index.html"
+
+        response = requests.get(url)
+
+        if response.status_code == 200:
+            with open(webpage_name, "w", encoding="utf-8") as file:
+                file.write(response.text)
+            print(f"網頁下載成功！已儲存為 {webpage_name}")
+        else:
+            print(f"錯誤：無法下載網頁。狀態碼：{response.status_code}")
+    except Exception as e:
+        print(f"錯誤：{str(e)}")
+
 def parseArgs(rv,argv):
     # parse args
     try:
@@ -312,40 +328,22 @@ class ResourceValidate(object):
               schname += '.json'
               self.rescount += 1
               self.validate(data,schname,fname)
-    def download_webpage(url):
-        try:
-            # 解析URL以獲取網頁名稱
-            parsed_url = urlparse(url)
-            webpage_name = parsed_url.path.split("/")[-1] or "index.html"
-    
-            # 發送GET請求
-            response = requests.get(url)
-    
-            # 檢查請求是否成功
-            if response.status_code == 200:
-                # 將網頁內容保存到文件中，以網頁名稱作為檔案名稱
-                with open(webpage_name, "w", encoding="utf-8") as file:
-                    file.write(response.text)
-                print(f"網頁下載成功！已儲存為 {webpage_name}")
-            else:
-                print(f"錯誤：無法下載網頁。狀態碼：{response.status_code}")
-        except Exception as e:
-            print(f"錯誤：{str(e)}")
 
     def getFromOrg(self,schname):
         ''' Fetch the schema from the redfish organization
         '''
         r = requests.get(self.orgurl + schname)
+        uri = self.orgurl + schname
         if r.status_code != 200:
             self.errHandle('ERROR GET ERROR: schema not found',
                             r.status_code,schname)
             r = requests.get(self.orgurl1 + schname)
-            # if r.status_code != 200:
-            #     self.errHandle('ERROR GET ERROR: schema not found',
-            #     r.status_code,schname)
-            #     return -1
-        download_webpage(r.uri)
-            # return -1
+            if r.status_code != 200:
+                self.errHandle('ERROR GET ERROR: schema not found',
+                r.status_code,schname)
+                uri = self.orgurl1 + schname
+                return -1
+        download_webpage(uri)
         return r.text
 
     def getFromLocal(self,schname):
