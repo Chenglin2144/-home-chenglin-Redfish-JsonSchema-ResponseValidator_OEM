@@ -319,7 +319,7 @@ class ResourceValidate(object):
         try:
             # 發送 GET 請求
             response = requests.get(uri_name)
-
+            print("uri name",uri_name)
             # 檢查請求是否成功
             if response.status_code == 200:
                 # 獲取 URL 中的最後一部分作為檔案名稱
@@ -340,17 +340,22 @@ class ResourceValidate(object):
     def getFromOrg(self,schname):
         ''' Fetch the schema from the redfish organization
         '''
-        r = requests.get(self.orgurl + schname)
-        uri = self.orgurl + schname
+        if schname == "StorageServiceCollection.json" or schname == "StoragePoolCollection.json" or schname == "StorageService.v1_4_0.json" :
+            r = requests.get(self.orgurl1 + schname)
+            uri = self.orgurl1 + schname
+        else :
+            r = requests.get(self.orgurl + schname)
+            uri = self.orgurl + schname
+
         if r.status_code != 200:
             self.errHandle('ERROR GET ERROR: schema not found',
                             r.status_code,schname)
-            r = requests.get(self.orgurl1 + schname)
-            if r.status_code != 200:
-                self.errHandle('ERROR GET ERROR: schema not found',
-                r.status_code,schname)
-                uri = self.orgurl1 + schname
-                return -1
+            # r = requests.get(self.orgurl1 + schname)
+            # if r.status_code != 200:
+            #     self.errHandle('ERROR GET ERROR: schema not found',
+            #     r.status_code,schname)
+            #     uri = self.orgurl1 + schname
+            return -1
         # print("uri is ",uri)
         target_folder = "/home/chenglin/DMTFSchemas"
         self.download_webpage(uri,target_folder)
